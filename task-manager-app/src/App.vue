@@ -48,14 +48,14 @@ export default {
         });
     },
     loginWithGoogle() {
-      firebase.auth().signInWithPopup(auth, googleProvider)
-        .then((result) => {
-          this.user = result.user;
-        })
-        .catch((error) => {
-          alert(error.message);
-        });
-    },
+  firebase.auth().signInWithPopup(googleProvider) // Corrected: only googleProvider as argument
+    .then((result) => {
+      this.user = result.user;
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
+},
     logout() {
       auth.signOut().then(() => {
         this.user = null;
