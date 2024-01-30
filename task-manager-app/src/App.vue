@@ -81,21 +81,12 @@ export default {
   color: #2c3e50;
 }
 
-.form-container {
-  max-width: 50%;
-  margin: 50px auto;
-  padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  background-color: white;
-}
-
-.form {
+.login-form {
   display: flex;
   flex-direction: column;
 }
 
-.form input {
+.login-form input {
   margin-bottom: 15px;
   padding: 10px;
   border: 1px solid #ddd;
@@ -103,7 +94,7 @@ export default {
   font-size: 16px;
 }
 
-.form button {
+.login-form button {
   background-color: #3498db;
   color: white;
   padding: 10px 15px;
@@ -113,21 +104,30 @@ export default {
   font-size: 16px;
 }
 
-.form button:hover {
+.login-form button:hover {
   background-color: #2980b9;
 }
 
-/* Specific Styles for Login Form */
 .login-form-container {
-  /* Additional specific styles for login form container */
+  max-width: 50%;
+  margin: 50px auto;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
 }
 
-.login-form {
-  /* Additional specific styles for login form */
+.task-form {
+  display: flex;
+  flex-direction: column;
 }
 
-/* Specific Styles for Task Form */
 .task-form-container {
-  /* Additional specific styles for task form container */
+  max-width: 50%;
+  margin: 50px auto;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
 }
 </style>
