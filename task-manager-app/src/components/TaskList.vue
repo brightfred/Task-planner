@@ -1,6 +1,12 @@
 <template>
     <div>
-      <TaskItem v-for="task in tasks" :key="task.id" :task="task" @delete-task="deleteTask" />
+      <TaskItem
+        v-for="task in tasks"
+        :key="task.id"
+        :task="task"
+        @delete-task="deleteTask"
+        @toggle-completion="toggleCompletion"
+      />
     </div>
   </template>
   
@@ -8,34 +14,23 @@
   import TaskItem from './TaskItem.vue';
   
   export default {
-    name: 'TaskList',
     components: {
-      TaskItem
+      TaskItem,
     },
     props: {
-      tasks: Array
+      tasks: Array,
     },
     methods: {
-      deleteTask(taskId) {
-        this.$emit('delete-task', taskId);
-      }
-    }
+      deleteTask(id) {
+        this.$emit('delete-task', id);
+      },
+      toggleCompletion(id) {
+        this.$emit('toggle-completion', id);
+      },
+    },
   };
   </script>
   
   <style>
-  .task-item {
-    background-color: #ecf0f1;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  
-  .completed-task {
-    color: #95a5a6;
-    text-decoration: line-through;
-  }
+  /* Add your styles here */
   </style>

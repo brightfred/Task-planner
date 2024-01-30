@@ -3,12 +3,14 @@
     <div v-if="user">
       <h1>Welcome, {{ user.email }}</h1>
       <button @click="logout">Logout</button>
-      <AddTaskForm @task-added="addNewTask" />
-      <TaskList :tasks="tasks" @delete-task="deleteTask" @toggle-completion="toggleTaskCompletion" />
+      <div class="task-form-container">
+        <AddTaskForm @task-added="addNewTask" />
+        <TaskList :tasks="tasks" @delete-task="deleteTask" @toggle-completion="toggleTaskCompletion" />
+      </div>
     </div>
-    <div v-else>
+    <div v-else class="login-form-container">
       <h1>Login</h1>
-      <form @submit.prevent="login">
+      <form @submit.prevent="login" class="login-form">
         <input type="email" v-model="email" placeholder="Email">
         <input type="password" v-model="password" placeholder="Password">
         <button type="submit">Login</button>
@@ -70,43 +72,62 @@ export default {
 };
 </script>
 
-
 <style>
+/* Common Styles */
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
-  width: 100px;
 }
 
-button {
+.form-container {
+  max-width: 50%;
+  margin: 50px auto;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form input {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.form button {
   background-color: #3498db;
   color: white;
-  border: none;
   padding: 10px 15px;
-  margin: 5px;
-  border-radius: 5px;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  font-size: 16px;
 }
 
-button:hover {
+.form button:hover {
   background-color: #2980b9;
 }
 
-input[type="text"] {
-  padding: 10px;
-  border: 2px solid #bdc3c7;
-  border-radius: 5px;
-  font-size: 16px;
-  margin-right: 5px;
+/* Specific Styles for Login Form */
+.login-form-container {
+  /* Additional specific styles for login form container */
 }
 
-input[type="checkbox"] {
-  transform: scale(1.5);
-  margin-right: 10px;
+.login-form {
+  /* Additional specific styles for login form */
+}
+
+/* Specific Styles for Task Form */
+.task-form-container {
+  /* Additional specific styles for task form container */
 }
 </style>

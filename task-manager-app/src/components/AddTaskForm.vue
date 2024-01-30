@@ -1,16 +1,15 @@
 <template>
     <form @submit.prevent="addTask">
-      <input type="text" v-model="newTaskTitle" placeholder="Add a new task">
+      <input type="text" v-model="newTaskTitle" placeholder="Enter a new task" />
       <button type="submit">Add Task</button>
     </form>
   </template>
   
   <script>
   export default {
-    name: 'AddTaskForm',
     data() {
       return {
-        newTaskTitle: ''
+        newTaskTitle: '',
       };
     },
     methods: {
@@ -19,13 +18,11 @@
           this.$emit('task-added', this.newTaskTitle);
           this.newTaskTitle = '';
         }
-      }
-    }
+      },
+    },
   };
   </script>
   
+
   <style>
-  form {
-    margin-bottom: 20px;
-  }
   </style>
