@@ -1,11 +1,23 @@
 <template>
   <div id="app">
-    <AddTaskForm @task-added="addNewTask" />
-    <TaskList :tasks="tasks" @delete-task="deleteTask" @toggle-completion="toggleTaskCompletion" />
+    <div v-if="user">
+      <h1>Welcome, {{ user.email }}</h1>
+      <button @click="logout">Logout</button>
+      <!-- Task manager components -->
+      <AddTaskForm @task-added="addNewTask" />
+      <TaskList :tasks="tasks" @delete-task="deleteTask" @toggle-completion="toggleTaskCompletion" />
+    </div>
+    <div v-else>
+      <h1>Login</h1>
+      <input type="email" v-model="email" placeholder="Email">
+      <input type="password" v-model="password" placeholder="Password">
+      <button @click="login">Login</button>
+    </div>
   </div>
 </template>
 
 <script>
+import { auth } from './firebaseSdk'; // Import the auth object from firebaseSdk.js
 import AddTaskForm from './components/AddTaskForm.vue';
 import TaskList from './components/TaskList.vue';
 
@@ -17,7 +29,10 @@ export default {
   },
   data() {
     return {
-      tasks: []
+      tasks: [],
+      email: '',
+      password: '',
+      user: null
     };
   },
   methods: {
@@ -36,7 +51,28 @@ export default {
     },
     deleteTask(taskId) {
       this.tasks = this.tasks.filter(task => task.id !== taskId);
+    },
+    login() {
+      auth.signInWithEmailAndPassword(this.email, this.password)
+        .then(res => {
+          this.user = res.user;
+          this.email = '';
+          this.password = '';
+        })
+        .catch(err => {
+          alert(err.message);
+        });
+    },
+    logout() {
+      auth.signOut().then(() => {
+        this.user = null;
+      });
     }
+  },
+  created() {
+    auth.onAuthStateChanged(user => {
+      this.user = user;
+    });
   }
 };
 </script>
@@ -50,6 +86,7 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+  width: 100px;
 }
 
 button {
