@@ -20,8 +20,7 @@
 </template>
 
 <script>
-import { auth, googleProvider, signInWithPopup } from './firebaseSdk';
-
+import { auth, googleProvider, firebase } from './firebaseSdk';
 import AddTaskForm from './components/AddTaskForm.vue';
 import TaskList from './components/TaskList.vue';
 
@@ -49,7 +48,7 @@ export default {
         });
     },
     loginWithGoogle() {
-      signInWithPopup(auth, googleProvider)
+      firebase.auth().signInWithPopup(auth, googleProvider)
         .then((result) => {
           this.user = result.user;
         })
@@ -71,9 +70,6 @@ export default {
 };
 </script>
 
-<style>
-/* Your styles here */
-</style>
 
 <style>
 #app {

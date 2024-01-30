@@ -1,7 +1,7 @@
 // src/firebaseSdk.js
 
-import firebase from 'firebase/compat/app'; // Use compat version for compatibility with older Firebase syntax
-import 'firebase/compat/auth'; // Import auth module
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 // import 'firebase/compat/firestore'; // Uncomment if you're using Firestore
 
 // Firebase configuration
@@ -15,19 +15,12 @@ const firebaseConfig = {
   measurementId: "G-2C4YZXG7DK"
 };
 
-// Initialize Firebase
 const firebaseApp = firebase.initializeApp(firebaseConfig);
-
-// Initialize Firebase Auth and providers
 const auth = firebase.auth();
+
 const googleProvider = new firebase.auth.GoogleAuthProvider();
-// Define other providers as needed
 
-// Exporting the authentication service and providers
-export { auth, googleProvider };
-
-// If you're using Firestore, export it
-// const db = firebaseApp.firestore();
-// export { db };
+// Export the authentication service, providers, and signInWithPopup function
+export { auth, googleProvider, firebase };
 
 export default firebaseApp;
