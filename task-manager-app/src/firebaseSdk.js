@@ -1,9 +1,10 @@
+// src/firebaseSdk.js
 
-import firebase from 'firebase/app';
-import 'firebase/auth';
-// If you're using Firestore, uncomment the next line
-import 'firebase/firestore';
+import firebase from 'firebase/compat/app'; // Use compat version for compatibility with older Firebase syntax
+import 'firebase/compat/auth'; // Import auth module
+// import 'firebase/compat/firestore'; // Uncomment if you're using Firestore
 
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAWoeiX1hVpkngbhGeW01lrpKWQJl7Inj8",
   authDomain: "fl-easy-planner.firebaseapp.com",
@@ -17,10 +18,16 @@ const firebaseConfig = {
 // Initialize Firebase
 const firebaseApp = firebase.initializeApp(firebaseConfig);
 
-// Exporting the authentication service
-export const auth = firebaseApp.auth();
+// Initialize Firebase Auth and providers
+const auth = firebase.auth();
+const googleProvider = new firebase.auth.GoogleAuthProvider();
+// Define other providers as needed
+
+// Exporting the authentication service and providers
+export { auth, googleProvider };
 
 // If you're using Firestore, export it
-// export const db = firebaseApp.firestore();
+// const db = firebaseApp.firestore();
+// export { db };
 
 export default firebaseApp;

@@ -3,21 +3,25 @@
     <div v-if="user">
       <h1>Welcome, {{ user.email }}</h1>
       <button @click="logout">Logout</button>
-      <!-- Task manager components -->
       <AddTaskForm @task-added="addNewTask" />
       <TaskList :tasks="tasks" @delete-task="deleteTask" @toggle-completion="toggleTaskCompletion" />
     </div>
     <div v-else>
       <h1>Login</h1>
-      <input type="email" v-model="email" placeholder="Email">
-      <input type="password" v-model="password" placeholder="Password">
-      <button @click="login">Login</button>
+      <form @submit.prevent="login">
+        <input type="email" v-model="email" placeholder="Email">
+        <input type="password" v-model="password" placeholder="Password">
+        <button type="submit">Login</button>
+      </form>
+      <button @click="loginWithGoogle">Login with Google</button>
+      <!-- Add buttons for other providers as needed -->
     </div>
   </div>
 </template>
 
 <script>
-import { auth } from './firebaseSdk'; // Import the auth object from firebaseSdk.js
+import { auth, googleProvider, signInWithPopup } from './firebaseSdk';
+
 import AddTaskForm from './components/AddTaskForm.vue';
 import TaskList from './components/TaskList.vue';
 
@@ -29,38 +33,28 @@ export default {
   },
   data() {
     return {
-      tasks: [],
       email: '',
       password: '',
       user: null
     };
   },
   methods: {
-    addNewTask(taskTitle) {
-      const newTask = {
-        id: Date.now(),
-        title: taskTitle,
-        completed: false
-      };
-      this.tasks.push(newTask);
-    },
-    toggleTaskCompletion(taskId) {
-      this.tasks = this.tasks.map(task =>
-        task.id === taskId ? { ...task, completed: !task.completed } : task
-      );
-    },
-    deleteTask(taskId) {
-      this.tasks = this.tasks.filter(task => task.id !== taskId);
-    },
     login() {
       auth.signInWithEmailAndPassword(this.email, this.password)
-        .then(res => {
-          this.user = res.user;
-          this.email = '';
-          this.password = '';
+        .then((userCredential) => {
+          this.user = userCredential.user;
         })
-        .catch(err => {
-          alert(err.message);
+        .catch((error) => {
+          alert(error.message);
+        });
+    },
+    loginWithGoogle() {
+      signInWithPopup(auth, googleProvider)
+        .then((result) => {
+          this.user = result.user;
+        })
+        .catch((error) => {
+          alert(error.message);
         });
     },
     logout() {
@@ -77,6 +71,9 @@ export default {
 };
 </script>
 
+<style>
+/* Your styles here */
+</style>
 
 <style>
 #app {
