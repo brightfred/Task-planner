@@ -1,11 +1,16 @@
 <template>
-  <div id="app">
+  <div id="app" :style="{ backgroundColor: backgroundColor }">
     <div v-if="user" class="task-form-container">
       <h1>Welcome, {{ user.email }}</h1>
       <p class="daily-quote">{{ dailyQuote }}</p>
       <button @click="logout">Logout</button>
 
-      <!-- Weekday Tabs -->
+      <select v-model="backgroundColor">
+        <option value="#FFFFFF">White</option>
+        <option value="#F0E68C">Khaki</option>
+        <option value="#ADD8E6">Light Blue</option>
+      </select>
+
       <div class="weekdays">
         <button
           v-for="day in Object.keys(tasks)"
@@ -17,7 +22,6 @@
         </button>
       </div>
 
-      <!-- Task Add Form -->
       <div class="task-form">
         <form @submit.prevent="addNewTask">
           <input type="text" v-model="newTaskTitle" placeholder="Enter a new task" />
@@ -25,7 +29,6 @@
         </form>
       </div>
 
-      <!-- Task List -->
       <div>
         <h2>Ongoing Tasks</h2>
         <div v-for="task in ongoingTasks" :key="task.id">
@@ -44,42 +47,80 @@
     </div>
     
     <div v-else class="login-form-container">
-      <!-- Login Form -->
-      <h1>Login</h1>
-      <form @submit.prevent="login" class="login-form">
-        <input type="email" v-model="email" placeholder="Email">
-        <input type="password" v-model="password" placeholder="Password">
-        <button type="submit">Login</button>
-      </form>
-      <button @click="loginWithGoogle">Login with Google</button>
+      <button @click="showRegistration = !showRegistration">
+        {{ showRegistration ? 'Login' : 'Register' }}
+      </button>
+
+      <div v-if="showRegistration">
+        <h1>Register</h1>
+        <form @submit.prevent="register" class="login-form">
+          <input type="email" v-model="email" placeholder="Email">
+          <input type="password" v-model="password" placeholder="Password">
+          <button type="submit">Register</button>
+        </form>
+      </div>
+
+      <div v-else>
+        <h1>Login</h1>
+        <form @submit.prevent="login" class="login-form">
+          <input type="email" v-model="email" placeholder="Email">
+          <input type="password" v-model="password" placeholder="Password">
+          <button type="submit">Login</button>
+        </form>
+        <button @click="loginWithGoogle">Login with Google</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { auth, firebase, googleProvider } from './firebaseSdk';
+import { auth, googleProvider } from './firebaseSdk';
 
 export default {
   name: 'App',
   data() {
     return {
       tasks: {
+        General: [],
         Monday: [],
         Tuesday: [],
-        // ... rest of the days
+        Wednesday: [],
+        Thursday: [],
+        Friday: [],
+        Saturday: [],
+        Sunday: []
       },
-      currentDay: 'Monday',
+      currentDay: 'General',
       newTaskTitle: '',
       email: '',
       password: '',
       user: null,
       quotes: [
         "Believe you can and you're halfway there.",
-        "It does not matter how slowly you go as long as you do not stop.",
-        "You are never too old to set another goal or to dream a new dream.",
-        // ... additional quotes
+        "The only way to do great work is to love what you do. Steve",
+        "Believe you can and you're halfway there. Theodore Roosevelt",
+        "The only limit to our realization of tomorrow is our doubts of today. Franklin D. Roosevelt",
+        "It does not matter how slowly you go as long as you do not stop. Confucius",
+        "Your time is limited, don’t waste it living someone else’s life. Steve Jobs",
+        "Don’t watch the clock; do what it does. Keep going. Sam Levenson",
+        "You are never too old to set another goal or to dream a new dream. C.S. Lewis",
+        "Keep your face always toward the sunshine—and shadows will fall behind you. Walt Whitman",
+        "Success is not final, failure is not fatal: It is the courage to continue that counts. Winston S. Churchill",
+        "The future belongs to those who believe in the beauty of their dreams. Eleanor Roosevelt",
+        "The best way to predict the future is to invent it. Alan Kay",
+        "I can't change the direction of the wind, but I can adjust my sails to always reach my destination. Jimmy Dean",
+        "Whether you think you can or you think you can’t, you’re right. Henry Ford",
+        "The way to get started is to quit talking and begin doing. Walt Disney",
+        "The secret of getting ahead is getting started. Mark Twain",
+        "With the new day comes new strength and new thoughts. Eleanor Roosevelt",
+        "Life is 10% what happens to us and 90% how we react to it. Charles R. Swindoll",
+        "Act as if what you do makes a difference. It does. William James",
+        "The harder you work for something, the greater you’ll feel when you achieve it. Anonymous",
+        "Dream big and dare to fail. Norman Vaughan"
       ],
       dailyQuote: '',
+      backgroundColor: '#FFFFFF',
+      showRegistration: false,
     };
   },
   computed: {
@@ -119,8 +160,18 @@ export default {
           alert(error.message);
         });
     },
+    register() {
+      auth.createUserWithEmailAndPassword(this.email, this.password)
+        .then((userCredential) => {
+          this.user = userCredential.user;
+          this.showRegistration = false;
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+    },
     loginWithGoogle() {
-      firebase.auth().signInWithPopup(googleProvider)
+      auth.signInWithPopup(googleProvider)
         .then((result) => {
           this.user = result.user;
         })
@@ -131,12 +182,9 @@ export default {
     logout() {
       auth.signOut().then(() => {
         this.user = null;
+      }).catch((error) => {
+        console.error("Logout failed: ", error);
       });
-    },
-    startNotifications() {
-      setInterval(() => {
-        new Notification("Reminder", { body: "Check your tasks!" });
-      }, 7200000); // 2 hours in milliseconds
     },
   },
   created() {
@@ -144,85 +192,95 @@ export default {
     auth.onAuthStateChanged(user => {
       this.user = user;
     });
-    if (Notification.permission === "granted") {
-      this.startNotifications();
-    } else if (Notification.permission !== "denied") {
-      Notification.requestPermission().then(permission => {
-        if (permission === "granted") {
-          this.startNotifications();
-        }
-      });
-    }
   }
 };
 </script>
 
 
 <style>
-/* Common Styles */
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'Arial', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+  box-sizing: border-box;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+h1 {
+  color: #333;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+h2 {
+  color: #333;
+  font-size: 20px;
+  margin-top: 20px;
+}
+
+.daily-quote {
+  font-style: italic;
+  color: #555;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.task-form-container, .login-form-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  margin: 20px auto;
 }
 
 .form {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
 .form input {
-  margin-bottom: 15px;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 2px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
 }
 
 .form button {
-  background-color: #3498db;
+  background-color: #4CAF50;
   color: white;
   padding: 10px 15px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
+  transition: background-color 0.3s;
 }
 
 .form button:hover {
-  background-color: #2980b9;
+  background-color: #45a049;
 }
 
-.form-container {
-  max-width: 50%;
-  margin: 50px auto;
-  padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  background-color: white;
-}
-
-.task-form-container, .login-form-container {
-  max-width: 50%;
-  margin: 50px auto;
-  padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  background-color: white;
-}
-
-.completed {
-  text-decoration: line-through;
+.weekdays {
+  display: flex;
+  justify-content: space-evenly;
+  flex-direction:row;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .weekdays button {
-  margin: 5px;
-  padding: 10px;
+  padding: 8px 16px;
   border: none;
   background-color: #f0f0f0;
   border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.weekdays button:hover {
+  background-color: #e0e0e0;
 }
 
 .weekdays button.active {
@@ -230,9 +288,44 @@ export default {
   color: white;
 }
 
-.daily-quote {
-  font-style: italic;
+select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 2px solid #ddd;
   margin-bottom: 20px;
 }
 
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.task-item {
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task-item button {
+  background-color: #FF5722;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.task-item button:hover {
+  background-color: #f44336;
+}
+
+.completed {
+  text-decoration: line-through;
+  color: #777;
+}
 </style>

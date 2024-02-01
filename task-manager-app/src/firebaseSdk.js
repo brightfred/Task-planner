@@ -1,10 +1,8 @@
-// src/firebaseSdk.js
 
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
-// import 'firebase/compat/firestore'; // Uncomment if you're using Firestore
+import 'firebase/compat/firestore';
 
-// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAWoeiX1hVpkngbhGeW01lrpKWQJl7Inj8",
   authDomain: "fl-easy-planner.firebaseapp.com",
@@ -15,12 +13,10 @@ const firebaseConfig = {
   measurementId: "G-2C4YZXG7DK"
 };
 
-const firebaseApp = firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+firebase.initializeApp(firebaseConfig);
 
+const auth = firebase.auth();
+const db = firebase.firestore();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 
-// Export the authentication service, providers, and signInWithPopup function
-export { auth, googleProvider, firebase };
-
-export default firebaseApp;
+export { auth, db, googleProvider, firebase };
