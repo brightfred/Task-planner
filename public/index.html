@@ -1,89 +1,331 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+<template>
+  <div id="app" :style="{ backgroundColor: backgroundColor }">
+    <div v-if="user" class="task-form-container">
+      <h1>Welcome, {{ user.email }}</h1>
+      <p class="daily-quote">{{ dailyQuote }}</p>
+      <button @click="logout">Logout</button>
 
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/10.7.2/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/10.7.2/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/10.7.2/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/10.7.2/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/10.7.2/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/10.7.2/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/10.7.2/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/10.7.2/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/10.7.2/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/10.7.2/firebase-performance-compat.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+      <select v-model="backgroundColor">
+        <option value="#FFFFFF">White</option>
+        <option value="#F0E68C">Khaki</option>
+        <option value="#ADD8E6">Light Blue</option>
+      </select>
 
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
+      <div class="weekdays">
+        <button
+          v-for="day in Object.keys(tasks)"
+          :key="day"
+          @click="currentDay = day"
+          :class="{ active: currentDay === day }"
+        >
+          {{ day }}
+        </button>
+      </div>
+
+      <div class="task-form">
+        <form @submit.prevent="addNewTask">
+          <input type="text" v-model="newTaskTitle" placeholder="Enter a new task" />
+          <button type="submit">Add Task</button>
+        </form>
+      </div>
+
+      <div>
+        <h2>Ongoing Tasks</h2>
+        <div v-for="task in ongoingTasks" :key="task.id">
+          <span :class="{ completed: task.completed }">{{ task.title }}</span>
+          <button @click="toggleTaskCompletion(task.id)">Toggle</button>
+          <button @click="deleteTask(task.id)">Delete</button>
+        </div>
+
+        <h2>Completed Tasks</h2>
+        <div v-for="task in completedTasks" :key="task.id">
+          <span :class="{ completed: task.completed }">{{ task.title }}</span>
+          <button @click="toggleTaskCompletion(task.id)">Toggle</button>
+          <button @click="deleteTask(task.id)">Delete</button>
+        </div>
+      </div>
     </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
+    
+    <div v-else class="login-form-container">
+      <button @click="showRegistration = !showRegistration">
+        {{ showRegistration ? 'Login' : 'Register' }}
+      </button>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+      <div v-if="showRegistration">
+        <h1>Register</h1>
+        <form @submit.prevent="register" class="login-form">
+          <input type="email" v-model="email" placeholder="Email">
+          <input type="password" v-model="password" placeholder="Password">
+          <button type="submit">Register</button>
+        </form>
+      </div>
 
-        try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
-        }
+      <div v-else>
+        <h1>Login</h1>
+        <form @submit.prevent="login" class="login-form">
+          <input type="email" v-model="email" placeholder="Email">
+          <input type="password" v-model="password" placeholder="Password">
+          <button type="submit">Login</button>
+        </form>
+        <button @click="loginWithGoogle">Login with Google</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { auth, googleProvider } from './firebaseSdk';
+
+export default {
+  name: 'App',
+  data() {
+    return {
+      tasks: {
+        General: [],
+        Monday: [],
+        Tuesday: [],
+        Wednesday: [],
+        Thursday: [],
+        Friday: [],
+        Saturday: [],
+        Sunday: []
+      },
+      currentDay: 'General',
+      newTaskTitle: '',
+      email: '',
+      password: '',
+      user: null,
+      quotes: [
+        "Believe you can and you're halfway there.",
+        "The only way to do great work is to love what you do. Steve",
+        "Believe you can and you're halfway there. Theodore Roosevelt",
+        "The only limit to our realization of tomorrow is our doubts of today. Franklin D. Roosevelt",
+        "It does not matter how slowly you go as long as you do not stop. Confucius",
+        "Your time is limited, don’t waste it living someone else’s life. Steve Jobs",
+        "Don’t watch the clock; do what it does. Keep going. Sam Levenson",
+        "You are never too old to set another goal or to dream a new dream. C.S. Lewis",
+        "Keep your face always toward the sunshine—and shadows will fall behind you. Walt Whitman",
+        "Success is not final, failure is not fatal: It is the courage to continue that counts. Winston S. Churchill",
+        "The future belongs to those who believe in the beauty of their dreams. Eleanor Roosevelt",
+        "The best way to predict the future is to invent it. Alan Kay",
+        "I can't change the direction of the wind, but I can adjust my sails to always reach my destination. Jimmy Dean",
+        "Whether you think you can or you think you can’t, you’re right. Henry Ford",
+        "The way to get started is to quit talking and begin doing. Walt Disney",
+        "The secret of getting ahead is getting started. Mark Twain",
+        "With the new day comes new strength and new thoughts. Eleanor Roosevelt",
+        "Life is 10% what happens to us and 90% how we react to it. Charles R. Swindoll",
+        "Act as if what you do makes a difference. It does. William James",
+        "The harder you work for something, the greater you’ll feel when you achieve it. Anonymous",
+        "Dream big and dare to fail. Norman Vaughan"
+      ],
+      dailyQuote: '',
+      backgroundColor: '#FFFFFF',
+      showRegistration: false,
+    };
+  },
+  computed: {
+    ongoingTasks() {
+      return this.tasks[this.currentDay].filter(task => !task.completed);
+    },
+    completedTasks() {
+      return this.tasks[this.currentDay].filter(task => task.completed);
+    },
+  },
+  methods: {
+    addNewTask() {
+      if (this.newTaskTitle.trim()) {
+        const newTask = {
+          id: Date.now(),
+          title: this.newTaskTitle,
+          completed: false
+        };
+        this.tasks[this.currentDay].push(newTask);
+        this.newTaskTitle = '';
+      }
+    },
+    toggleTaskCompletion(taskId) {
+      this.tasks[this.currentDay] = this.tasks[this.currentDay].map(task =>
+        task.id === taskId ? { ...task, completed: !task.completed } : task
+      );
+    },
+    deleteTask(taskId) {
+      this.tasks[this.currentDay] = this.tasks[this.currentDay].filter(task => task.id !== taskId);
+    },
+    login() {
+      auth.signInWithEmailAndPassword(this.email, this.password)
+        .then((userCredential) => {
+          this.user = userCredential.user;
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+    },
+    register() {
+      auth.createUserWithEmailAndPassword(this.email, this.password)
+        .then((userCredential) => {
+          this.user = userCredential.user;
+          this.showRegistration = false;
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+    },
+    loginWithGoogle() {
+      auth.signInWithPopup(googleProvider)
+        .then((result) => {
+          this.user = result.user;
+        })
+        .catch((error) => {
+          alert(error.message);
+        });
+    },
+    logout() {
+      auth.signOut().then(() => {
+        this.user = null;
+      }).catch((error) => {
+        console.error("Logout failed: ", error);
       });
-    </script>
-  </body>
-</html>
+    },
+  },
+  created() {
+    this.dailyQuote = this.quotes[Math.floor(Math.random() * this.quotes.length)];
+    auth.onAuthStateChanged(user => {
+      this.user = user;
+    });
+  }
+};
+</script>
+
+
+<style>
+#app {
+  font-family: 'Arial', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  box-sizing: border-box;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+h1 {
+  color: #333;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+h2 {
+  color: #333;
+  font-size: 20px;
+  margin-top: 20px;
+}
+
+.daily-quote {
+  font-style: italic;
+  color: #555;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.task-form-container, .login-form-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  margin: 20px auto;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form input {
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.form button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.form button:hover {
+  background-color: #45a049;
+}
+
+.weekdays {
+  display: flex;
+  justify-content: space-evenly;
+  flex-direction:row;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.weekdays button {
+  padding: 8px 16px;
+  border: none;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.weekdays button:hover {
+  background-color: #e0e0e0;
+}
+
+.weekdays button.active {
+  background-color: #3498db;
+  color: white;
+}
+
+select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 2px solid #ddd;
+  margin-bottom: 20px;
+}
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.task-item {
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task-item button {
+  background-color: #FF5722;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.task-item button:hover {
+  background-color: #f44336;
+}
+
+.completed {
+  text-decoration: line-through;
+  color: #777;
+}
+</style>
